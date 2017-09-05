@@ -1,14 +1,30 @@
-import errno
 import socket
-import tornado.ioloop
 
 
-def connection_ready(sock, fd, events):
+if __name__ == '__main__':
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setblocking(0)
+    server.settimeout(1)
+    server_address = ('0.0.0.0', 10000)
+    server.bind(server_address)
+    server.listen(5)
+
     while True:
-        try:
-            connection, address = sock.accept()
-        except sock.error as e:
-            if e.args[0] not in (errno.EWOULDBLOCK, errno.EAGAIN):
-                raise
-            return
-        connection.setblocking(0)
+        print('waiting for the next event...')
+        while True:
+            try:
+                connection, client_address = server.accept()
+                try:
+                    while True:
+                        data = connection.recv(16)
+                        if data:
+                            print(data)
+                        else:
+                            break
+                except Exception as e:
+                    print('Exception', e)
+                finally:
+                    connection.close()
+            except socket.error:
+                print('.')
+
